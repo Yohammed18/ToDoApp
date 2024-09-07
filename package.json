@@ -1,0 +1,14 @@
+{
+  "name": "todoapp",
+  "version": "1.0.0",
+  "description": "Creating a to do application using react node js and express",
+  "scripts": {
+    "build": "if-env TYPE=server && (cd server && npm install) || (cd client && npm install)",
+    "server": "nodemon ./server/server.js",
+    "client": "cd client && npm start"
+  },
+  "dependencies": {
+    "if-env": "^1.0.4",
+    "nodemon": "^3.1.4"
+  }
+}
