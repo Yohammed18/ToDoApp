@@ -2,6 +2,7 @@ const express = require('express')
 require('dotenv').config();
 const cors = require('cors')
 const pool = require('./db')
+const {v4: uuidv4} = require('uuid')
 
 let app = express()
 
@@ -10,6 +11,7 @@ const PORT = process.env.PORT || 5000
 
 // the cors will ensure the server and the client can communicate with each other and by pass the port issues
 app.use(cors())
+app.use(express.json())
 
 app.get('/todos/:userEmail', async (req, res) =>{
     
@@ -17,8 +19,6 @@ app.get('/todos/:userEmail', async (req, res) =>{
     const {userEmail} = req.params
 
     try {
-        
-        
         //await 
         const result = await pool.query('SELECT * FROM todos WHERE user_email = $1', [userEmail])
         res.json({
@@ -31,6 +31,47 @@ app.get('/todos/:userEmail', async (req, res) =>{
     }
 })
 
+// create todos
+app.post('/todos', async (req, res) =>{
+    const {user_email, title, progress, date} = req.body
+    const id = uuidv4()
+    
+    try {
+        const newToDo = await pool.query(`INSERT INTO todos(id, user_email, title, progress, date) VALUES($1, $2, $3, $4, $5)`, [id, user_email, title, progress, date])
+
+        res.status(201).json(newToDo)
+    } catch (err) {
+        console.error(err)
+    }
+})
+
+// edit todos
+app.put('/todos/:id', async (req, res)=>{
+    const {id} = req.params
+    const {user_email, title, progress, date} = req.body
+
+    try {
+        const editTodo = await pool.query(`UPDATE todos SET user_email = $1, title = $2, progress =$3, date = $4 where id = $5;`, [user_email, title, progress, date, id])
+
+        res.json(editTodo)
+
+    } catch (error) {
+        console.error(error)
+    }
+})
+
+// delete todos
+app.delete('/todos/:id', async (req,res)=>{
+    const {id} = req.params
+
+    try {
+        const deleteTodo = await pool.query(`DELETE FROM todos where id = $1;`, [id])
+        res.status(200).json(deleteTodo)
+        
+    } catch (error) {
+        console.error(error)
+    }
+})
 
 
 app.listen(PORT, () =>{
