@@ -1,16 +1,45 @@
 import React, { useState } from 'react'
+import {useCookies} from 'react-cookie'
 
 const Auth = () => {
 
+  const [cookie, setCookie, removeCookie] = useCookies(null)
   const [isLogIn, setIsLogin] = useState(true)
   const [error, setError] = useState(null)
   const [email, setEmail] = useState('')
-  const [passowrd, setPassword] = useState('')
-
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
   const viewLogin = (status) =>{
     setError(null)
     setIsLogin(status)
+  }
+
+  console.log(cookie)
+  const handleSubmit = async (e, endpoint) =>{
+    e.preventDefault()
+
+
+    if(!isLogIn && password !== confirmPassword){
+      setError('Make sure passwords match!')
+      return
+    }
+
+    const response = await fetch(`${process.env.REACT_APP_SERVERURL}/${endpoint}`,{
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({email, password})
+      })
+
+      const data = await response.json()
+      
+      if(data.detail){
+        setError(data.detail)  
+      } else {
+        setCookie('Email', data.email)
+        setCookie('AuthToken', data.token)
+        window.location.reload()
+      }
   }
   
   
@@ -24,30 +53,40 @@ const Auth = () => {
           placeholder='enter your email'
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className=''
           />
           <input 
           type="password" 
           placeholder='password'
-          value={passowrd}
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="new-password"
           />
-          {!isLogIn && <input type="password" placeholder='confirm password'/>}
-          <input type="submit" className="btn btn-primary btn-lg" />
-          {error && <p>{error}</p>}
+
+          {!isLogIn && <input 
+          type="password" 
+          placeholder='confirm password'
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          />}
+          
+          <input 
+          type="submit" 
+          className="btn btn-primary btn-lg" 
+          onClick={(e) => handleSubmit(e, isLogIn? 'login' : 'signup')}
+          />
+          {error && <p style={{color: 'red', fontSize: '18px', alignContent: 'center'}}>{error}</p>}
         </form>
         <div className="auth-options">
           <button 
-          className=""
-          style={{backgroundColor: !isLogIn ? 'rgb(255,255,255)' : 'rgb(188,188,188)'}}
-          onClick={() => viewLogin(false)}
-          >Sign Up</button>
+            className=""
+            onClick={() => viewLogin(true)}
+            style={{backgroundColor: isLogIn ? 'rgb(255,255,255)' : 'rgb(188,188,188)'}}
+            >Login</button>
           <button 
-          className=""
-          onClick={() => viewLogin(true)}
-          style={{backgroundColor: isLogIn ? 'rgb(255,255,255)' : 'rgb(188,188,188)'}}
-          >Login</button>
+            className=""
+            style={{backgroundColor: !isLogIn ? 'rgb(255,255,255)' : 'rgb(188,188,188)'}}
+            onClick={() => viewLogin(false)}
+            >Sign Up</button>
         </div>
       </div>      
     </div>
