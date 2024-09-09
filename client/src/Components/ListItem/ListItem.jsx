@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ProgressBar from '../ProgressBar/ProgressBar'
 import TickIcon from '../TickIcon/TickIcon'
 import Modal from '../Modal/Modal'
@@ -6,6 +6,26 @@ import Modal from '../Modal/Modal'
 const ListItem = ( {task, getData}) => {
 
   const [showModal, setShowModal] = useState(false)
+  const [readableDate, setReadableDate] = useState('')
+  const [readableTime, setReadableTime] = useState('')
+  useEffect(() =>{
+    const date = new Date(task.date)
+
+    const stringDate = date.toLocaleDateString('en-US', {
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric'
+      });
+
+      const readableTime = date.toLocaleTimeString('en-US', {
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: false // for 24-hour format
+      });
+    
+      setReadableDate(stringDate)
+      setReadableTime(readableTime)
+  }, [readableDate, readableTime])
 
   
   const deleteItem = async ()=>{
@@ -31,8 +51,8 @@ const ListItem = ( {task, getData}) => {
       
       <div className="info-container">
         <TickIcon />
-       <p className='task-title'>{task.title}</p> 
-       <ProgressBar />
+       <p className='task-title'>{task.title}<br />{readableDate} - {readableTime}</p> 
+       <ProgressBar progress={task.progress}/>
       </div>
 
       <div className="button-container">

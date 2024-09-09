@@ -15,10 +15,13 @@ const Auth = () => {
     setIsLogin(status)
   }
 
-  console.log(cookie)
   const handleSubmit = async (e, endpoint) =>{
     e.preventDefault()
 
+    if(password === '' || email === ''){
+      setError('One of the input field is empty!')
+      return
+    }
 
     if(!isLogIn && password !== confirmPassword){
       setError('Make sure passwords match!')
